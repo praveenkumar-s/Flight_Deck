@@ -7,8 +7,6 @@ from datetime import datetime
 from uuid import uuid1
 from flask import jsonify
 
-#app = Flask(__name__)
-
 registerAPI_blueprint = Blueprint('register',__name__)
 
 @registerAPI_blueprint.route('/')
@@ -22,12 +20,6 @@ def hello():
             "domain":""
         }
     """
-
-
-
-@registerAPI_blueprint.route('/data', methods = ['POST'])
-def post_data():
-    pass
 
 
 
