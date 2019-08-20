@@ -1,58 +1,10 @@
 from flask import Flask
-from flask import request
-import sqlite3
-from objectifier import Objectifier
-from datetime import datetime
-from uuid import uuid1
 from flask import jsonify
+from registerAPI import registerAPI_blueprint
 
 app = Flask(__name__)
+app.register_blueprint(registerAPI_blueprint)
 
-@app.route('/')
-def hello():
-    return 'Hello World!'
-
-
-
-@app.route('/data', methods = ['POST'])
-def post_data():
-    pass
-
-
-
-@app.route('/register', methods =['POST'])
-def register_client():
-    """
-        {
-            "host":"",
-            "user":"",
-            "password":"",
-            "domain":""
-        }
-    """
-    
-    data_object = Objectifier(request.get_json())
-    conn = sqlite3.connect("data.db")
-    cur = conn.cursor()
-    cur.execute("select id from hosts where HostName = ?", (data_object.host,) )
-    id = cur.fetchall()
-    if(id.__len__()==0):
-        id = str (uuid1())
-        cur.execute("insert into hosts values(?,?,?)",(id, data_object.host , datetime.now() ) )
-        conn.commit()
-        cur.execute("insert into cred values (?,?,?,?)",( id , data_object.domain , data_object.user , data_object.password) )
-        conn.commit()
-    else:
-        query_data = request.get_json()
-        query_data.pop('host')
-        for items in query_data.keys():
-            cur.execute("update cred set "+items+"=? where id = ?", (str(query_data[items]) , id[0][0]) )
-        if(cur.rowcount ==0):
-            cur.execute("insert into cred values (?,?,?,?)",( id[0][0] , data_object.domain , data_object.user , data_object.password) )
-        conn.commit()                    
-    conn.close()
-    return jsonify({"id":id[0][0]})
-        
 
 if __name__ == '__main__':
     app.run()
